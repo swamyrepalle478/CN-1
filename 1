@@ -1,0 +1,72 @@
+
+import platform
+import subprocess
+import socket
+
+def show_ip_config():
+    print("\n===== LAN CONFIGURATION =====")
+    print("Computer Name:", socket.gethostname())
+    print("Operating System:", platform.system())
+
+    if platform.system() == "Windows":
+        subprocess.run(["ipconfig"])
+    else:
+        subprocess.run(["ip", "addr"])
+
+def test_connection():
+    print("\n===== LAN CONNECTIVITY TEST =====")
+    target_ip = input("Enter the IP address to ping: ").strip()
+
+    if not target_ip:
+        print("Please enter an IP address.")
+        return
+
+    # Validate the IP address
+    try:
+        socket.inet_aton(target_ip)
+    except OSError:
+        print("Invalid IPv4 address.")
+        return
+
+    count_option = "-n" if platform.system() == "Windows" else "-c"
+
+    try:
+        result = subprocess.run(
+            ["ping", count_option, "4", target_ip],
+            capture_output=True,
+            text=True,
+            timeout=15
+        )
+
+        print(result.stdout)
+
+        if result.returncode == 0:
+            print("Result: LAN connectivity successful.")
+        else:
+            print("Result: No successful ping replies.")
+            print("Check IP settings, cables, firewall, and target PC.")
+
+    except subprocess.TimeoutExpired:
+        print("Ping timed out.")
+
+def main():
+    while True:
+        print("\n===== LAN NETWORK TESTING TOOL =====")
+        print("1. Display IP configuration")
+        print("2. Test connectivity using ping")
+        print("3. Exit")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            show_ip_config()
+        elif choice == "2":
+            test_connection()
+        elif choice == "3":
+            print("Program terminated.")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()
